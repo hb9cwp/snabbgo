@@ -40,21 +40,20 @@ func main() {
 	size := int(unsafe.Sizeof(0)) * n
 	var t testing.T
 	/*
-			 man mmap
-			 void *mmap(void *addr, size_t length, int prot, int flags,
-			            int fd, off_t offset);
+		 man mmap
+		 void *mmap(void *addr, size_t length, int prot, int flags,
+		            int fd, off_t offset);
 
-			 https://golang.org/src/syscall/syscall_linux.go?h=Mmap#L915
-			 func Mmap(fd int, offset int64, length int, prot int, flags int) (data []byte, err error) {
+		 https://golang.org/src/syscall/syscall_linux.go?h=Mmap#L915
+		 func Mmap(fd int, offset int64, length int, prot int, flags int) (data []byte, err error) {
 				return mapper.Mmap(fd, offset, length, prot, flags)
-			 }
+		 }
 
 		 from http://stackoverflow.com/questions/9203526/mapping-an-array-to-a-file-via-mmap-in-go
 		 map_file, err := os.Create("/tmp/test.dat")
-
 	*/
 	//mmap, err := syscall.Mmap(-1, 0, syscall.Getpagesize(), syscall.PROT_NONE, syscall.MAP_ANON|syscall.MAP_PRIVATE)
-	mmap, err := syscall.Mmap(-1, 0, n * size, syscall.PROT_READ|syscall.PROT_WRITE, syscall.MAP_ANON|syscall.MAP_PRIVATE)
+	mmap, err := syscall.Mmap(-1, 0, n*size, syscall.PROT_READ|syscall.PROT_WRITE, syscall.MAP_ANON|syscall.MAP_PRIVATE)
 	//mmap, err := syscall.Mmap(-1, 0, n * size, syscall.PROT_NONE, syscall.MAP_ANON|syscall.MAP_PRIVATE)
 	//mmap, err := syscall.Mmap(-1, 0, n * size, syscall.PROT_READ|syscall.PROT_WRITE, syscall.MAP_SHARED)
 	if err != nil {
@@ -62,24 +61,21 @@ func main() {
 	}
 	fmt.Printf("syscall.Mmap(): OK\n")
 
-	fmt.Println(reflect.TypeOf(mmap))	// mmap is a slice []byte (or equivalent []uint8)
+	fmt.Println(reflect.TypeOf(mmap)) // mmap is a slice []byte (or equivalent []uint8)
 	fmt.Println(mmap[0])
-	//mmap[0:0] = 'r'
 	//mmap[0] = 'r'
-	mmap[0] = byte(0)	// byte is an alias for uint8 and is equivalent to uint8 in all ways
+	mmap[0] = byte(99) // byte is an alias for uint8 and is equivalent to uint8 in all ways
 	//mmap[0] = uint8(0)
-	//mmap[1] = byte(1)
-	//	b[1]= 1
-	//	b[2]= 2
-	//	fmt.Printf("b[0,1,2]= %s\n", b[0],b[1],b[2])
+	mmap[1] = byte(101)
 	fmt.Println(mmap[0])
+	fmt.Println(mmap[1])
 
 	/*
-	map_array := (*[n]int)(unsafe.Pointer(&mmap[0]))
-	for i := 0; i < n; i++ {
-		map_array[i] = i * i
-	}
-	fmt.Println(*map_array)
+		map_array := (*[n]int)(unsafe.Pointer(&mmap[0]))
+		for i := 0; i < n; i++ {
+			map_array[i] = i * i
+		}
+		fmt.Println(*map_array)
 	*/
 
 	if err := syscall.Munmap(mmap); err != nil {
