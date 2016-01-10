@@ -36,7 +36,7 @@ import (
 //Mmap(t *testing.T) {
 //func main(t *testing.T) {
 func main() {
-	const n = 1e1
+	const n = 1e2
 	size := int(unsafe.Sizeof(0)) * n
 	var t testing.T
 	/*
@@ -53,9 +53,10 @@ func main() {
 		 map_file, err := os.Create("/tmp/test.dat")
 	*/
 	//mmap, err := syscall.Mmap(-1, 0, syscall.Getpagesize(), syscall.PROT_NONE, syscall.MAP_ANON|syscall.MAP_PRIVATE)
-	mmap, err := syscall.Mmap(-1, 0, n*size, syscall.PROT_READ|syscall.PROT_WRITE, syscall.MAP_ANON|syscall.MAP_PRIVATE)
-	//mmap, err := syscall.Mmap(-1, 0, n * size, syscall.PROT_NONE, syscall.MAP_ANON|syscall.MAP_PRIVATE)
-	//mmap, err := syscall.Mmap(-1, 0, n * size, syscall.PROT_READ|syscall.PROT_WRITE, syscall.MAP_SHARED)
+	mmap, err := syscall.Mmap(-1, 0, size, syscall.PROT_READ|syscall.PROT_WRITE, syscall.MAP_ANON|syscall.MAP_PRIVATE)
+	//mmap, err := syscall.Mmap(-1, 0, size, syscall.PROT_READ|syscall.PROT_WRITE, syscall.MAP_ANON|syscall.MAP_SHARED)
+	//mmap, err := syscall.Mmap(-1, 0, size, syscall.PROT_NONE, syscall.MAP_ANON|syscall.MAP_PRIVATE)
+	//mmap, err := syscall.Mmap(-1, 0, size, syscall.PROT_READ|syscall.PROT_WRITE, syscall.MAP_SHARED)
 	if err != nil {
 		t.Fatalf("Mmap: %v", err)
 	}
@@ -70,13 +71,26 @@ func main() {
 	fmt.Println(mmap[0])
 	fmt.Println(mmap[1])
 
-	/*
-		map_array := (*[n]int)(unsafe.Pointer(&mmap[0]))
-		for i := 0; i < n; i++ {
-			map_array[i] = i * i
-		}
-		fmt.Println(*map_array)
-	*/
+	map_array := (*[n]int)(unsafe.Pointer(&mmap[0]))
+	for i := 0; i < n; i++ {
+		map_array[i] = i * i
+	}
+	fmt.Println(*map_array)
+
+	for i := 0; i < 8; i++ {
+		fmt.Print(mmap[i])
+	}
+	fmt.Println()
+
+	for i := 8; i < 16; i++ {
+		fmt.Print(mmap[i])
+	}
+	fmt.Println()
+
+	for i := 16; i < 24; i++ {
+		fmt.Print(mmap[i])
+	}
+	fmt.Println()
 
 	if err := syscall.Munmap(mmap); err != nil {
 		t.Fatalf("Munmap: %v", err)
